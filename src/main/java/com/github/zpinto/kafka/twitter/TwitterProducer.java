@@ -1,4 +1,4 @@
-package com.github.zpinto.kafka.tutorial2;
+package com.github.zpinto.kafka.twitter;
 
 import com.google.common.collect.Lists;
 import com.twitter.hbc.ClientBuilder;
