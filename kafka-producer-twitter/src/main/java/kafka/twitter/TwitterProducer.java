@@ -1,4 +1,4 @@
-package com.github.zpinto.kafka.twitter;
+package kafka.twitter;
 
 import com.google.common.collect.Lists;
 import com.twitter.hbc.ClientBuilder;
@@ -30,7 +30,7 @@ public class TwitterProducer {
     private String token = "851677621293166593-SlN4YGtXKyUx1e6XYaVkqtnQPZAhRHu";
     private String tokenSecret = "Ru47yx4HMqhzHRS4oH9cB9XfMaJxxVHFpkmDyew53ITZA";
 
-    private List<String> terms = Lists.newArrayList("kafka");
+    private List<String> terms = Lists.newArrayList("kafka", "bitcoin", "usa", "politics");
 
     public TwitterProducer(){}
 
@@ -120,6 +120,16 @@ public class TwitterProducer {
         // type of the value that we are passing to Kafka
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
+        //create safe producer
+        properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
+        properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+        properties.setProperty(ProducerConfig.RETRIES_CONFIG, Integer.toString(Integer.MAX_VALUE));
+        properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5"); // kafka 2.0 >= 1.1 so we can keep this as 5. Use 1 otherwise
+
+        // high throughput producer (at the expense of a bit of latency and CPU usage)
+        properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "20");
+        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(32*1024));
 
         // create the producer
         return new KafkaProducer<String, String>(properties);
