@@ -24,16 +24,34 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 
 public class ElasticSearchConsumer {
     public static RestHighLevelClient createClient() {
-        String hostname = "kafka-course-7428368759.us-east-1.bonsaisearch.net";
-        String username = "9rjze9arbq";
-        String password = "yhm08ctm8b";
+
+        String hostname = "", username = "", password = "";
+
+        try (InputStream input = new FileInputStream("src/main/resources/twitter.properties")) {
+
+            Properties prop = new Properties();
+
+            // load a properties file
+            prop.load(input);
+
+            // get the property value and print it out
+            hostname = prop.getProperty("elasticsearch.hostname");
+            username = prop.getProperty("elasticsearch.username");
+            password = prop.getProperty("elasticsearch.password");
+
+        } catch (IOException ex) {
+            System.out.println("Insure that you have config file in src/main/resources/");
+            ex.printStackTrace();
+        }
 
         // don't do if you run local ES
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
@@ -73,6 +91,7 @@ public class ElasticSearchConsumer {
         consumer.subscribe(Arrays.asList(topic));
         return consumer;
     }
+
     private static final JsonParser jsonParser = new JsonParser();
     private static String extractIdFromTweet (String json) {
         // gson library

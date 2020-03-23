@@ -15,6 +15,9 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
@@ -25,18 +28,34 @@ public class TwitterProducer {
 
     private Logger logger = LoggerFactory.getLogger(TwitterProducer.class.getName());
 
-    private String consumerKey = "pMp1qlRC0753Z7scZ512inb8R";
-    private String consumerSecret = "ZlKbEpE8awXRWoamF6TJziCSkVcAXnP26b2qAjaF4Q7nDKrewu";
-    private String token = "851677621293166593-SlN4YGtXKyUx1e6XYaVkqtnQPZAhRHu";
-    private String tokenSecret = "Ru47yx4HMqhzHRS4oH9cB9XfMaJxxVHFpkmDyew53ITZA";
+    private String consumerKey;
+    private String consumerSecret;
+    private String token;
+    private String tokenSecret;
 
     private List<String> terms = Lists.newArrayList("kafka", "bitcoin", "usa", "politics");
 
-    public TwitterProducer(){}
+    public TwitterProducer(){
+        try (InputStream input = new FileInputStream("src/main/resources/twitter.properties")) {
 
-    public static void main(String[] args) {
-        new TwitterProducer().run();
+            Properties prop = new Properties();
+
+            // load a properties file
+            prop.load(input);
+
+            // get the property value and print it out
+            consumerKey = prop.getProperty("twitter.oauth.consumerKey");
+            consumerSecret = prop.getProperty("twitter.oauth.consumerSecret");
+            token = prop.getProperty("twitter.oauth.accessToken");
+            tokenSecret = prop.getProperty("twitter.oauth.accessTokenSecret");
+
+        } catch (IOException ex) {
+            System.out.println("Insure that you have config file in src/main/resources/");
+            ex.printStackTrace();
+        }
     }
+
+    public static void main(String[] args) { new TwitterProducer().run(); }
 
     public void run() {
         /** Set up your blocking queues: Be sure to size these properly based on expected TPS of your stream */
